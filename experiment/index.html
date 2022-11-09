@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>TEST: Geolocation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      /* from https://gist.github.com/JoeyBurzynski/617fb6201335779f8424ad9528b72c41 */
+      html {
+        max-width: 70ch;
+        padding: 3rem 1rem;
+        margin: auto;
+        line-height: 1.75;
+        font-size: 1rem;
+        box-sizing: border-box;
+      }
+
+      button {
+        padding: 2ch;
+      }
+
+      .scroll-block--x {
+        max-width: 100%;
+        max-height: 56ch;
+        overflow: auto;
+
+        border: 1px black solid;
+      }
+
+      #geolocation-table {
+        border-collapse: collapse;
+      }
+      #geolocation-table th {
+        position: sticky;
+        top: 0;
+        background-color: antiquewhite;
+      }
+      #geolocation-table th,
+      #geolocation-table td {
+        width: -moz-fit-content;
+        width: fit-content;
+        border-bottom: 1px black solid;
+        padding-left: 2ch;
+        padding-right: 2ch;
+      }
+      #geolocation-table tr:first-child {
+        border-bottom: 1px black solid;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>TEST: Geolocation</h1>
+    <button type="button" onclick="get_geolocation()">GET Geolocation</button>
+    <div class="scroll-block--x">
+      <table id="geolocation-table">
+        <thead>
+          <tr>
+            <th title="タイムスタンプ"> timestamp</th>
+            <th title="緯度[度]"> latitude[deg]</th>
+            <th title="経度[度]"> longitude[deg]</th>
+            <th title="緯度経度の精度[メートル]"> accuracy[m]</th>
+            <th title="海面からの相対高度[メートル]"> altitude[m]</th>
+            <th title="海面からの相対高度の精度[メートル]">
+              altitudeAccuracy[m]
+            </th>
+            <th title="真北を基準とした端末の向き[度]"> heading[deg]</th>
+            <th title="端末の移動速度[メートル毎秒]"> speed[m/s]</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <small>
+      ※timestamp は DOMTimestamp を Date クラスに入れて、 toLocaleDateString(),
+      toLocaleTimeString()を連結してます。
+    </small>
+  </body>
+  <script lang="js">
+    // https://developer.mozilla.org/ja/docs/Web/API/GeolocationCoordinates
+    function get_geolocation() {
+      navigator.geolocation.getCurrentPosition(
+        (geolocationPosition) => {
+          let tbody = document.querySelector("#geolocation-table tbody");
+
+          let timestamp = document.createElement("td");
+          let latitude = document.createElement("td");
+          let longitude = document.createElement("td");
+          let accuracy = document.createElement("td");
+          let altitude = document.createElement("td");
+          let altitudeAccuracy = document.createElement("td");
+          let heading = document.createElement("td");
+          let speed = document.createElement("td");
+
+          let ts = new Date(geolocationPosition.timestamp);
+          timestamp.textContent = `${ts.toLocaleDateString()} ${ts.toLocaleTimeString()}`;
+          latitude.textContent = geolocationPosition.coords.latitude;
+          longitude.textContent = geolocationPosition.coords.longitude;
+          accuracy.textContent = geolocationPosition.coords.accuracy;
+          altitude.textContent = geolocationPosition.coords.altitude;
+          altitudeAccuracy.textContent = geolocationPosition.coords.altitudeAccuracy;
+          heading.textContent = geolocationPosition.coords.heading;
+          speed.textContent = geolocationPosition.coords.speed;
+
+          let record = document.createElement("tr");
+          record.append(timestamp);
+          record.append(latitude);
+          record.append(longitude);
+          record.append(accuracy);
+          record.append(altitude);
+          record.append(altitudeAccuracy);
+          record.append(heading);
+          record.append(speed);
+
+          tbody.append(record);
+        },
+        (error) => {
+          let tbody = document.querySelector("#geolocation-table tbody");
+
+          let timestamp = document.createElement("td");
+          let latitude = document.createElement("td");
+          let longitude = document.createElement("td");
+          let accuracy = document.createElement("td");
+          let altitude = document.createElement("td");
+          let altitudeAccuracy = document.createElement("td");
+          let heading = document.createElement("td");
+          let speed = document.createElement("td");
+
+          timestamp.textContent = "error";
+          latitude.textContent = "error";
+          longitude.textContent = "error";
+          accuracy.textContent = "error";
+          altitude.textContent = "error";
+          altitudeAccuracy.textContent = "error";
+          heading.textContent = "error";
+          speed.textContent = "error";
+
+          let record = document.createElement("tr");
+          record.append(timestamp);
+          record.append(latitude);
+          record.append(longitude);
+          record.append(accuracy);
+          record.append(altitude);
+          record.append(altitudeAccuracy);
+          record.append(heading);
+          record.append(speed);
+
+          tbody.append(record);
+
+        },
+        {
+          maximumAge: 0,
+          timeout: 1000,
+          enableHighAccuracy: true
+        }
+      );
+    }
+  </script>
+</html>
