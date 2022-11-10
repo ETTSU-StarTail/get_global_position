@@ -18,14 +18,46 @@
 
       button {
         padding: 2ch;
+        margin-top: 2ch;
+        margin-bottom: 2ch;
+
+        border: none;
+        font-weight: bolder;
+        color: white;
+        background-color: cornflowerblue;
+      }
+      button:hover {
+        background-color: rgb(141, 174, 235);
+        cursor: pointer;
+      }
+
+      label,
+      input[type="checkbox"] {
+        cursor: pointer;
       }
 
       .scroll-block--x {
         max-width: 100%;
         max-height: 56ch;
         overflow: auto;
+      }
 
-        border: 1px black solid;
+      .form-data-list {
+        display: grid;
+        grid-template-columns: 12rem 1fr;
+      }
+
+      .form-data-list dt {
+        padding: 1ch;
+        grid-column: 1;
+        background-color: antiquewhite;
+      }
+      .form-data-list dd {
+        padding: 1ch;
+        margin: 0;
+        grid-column: 2;
+
+        background-color: whitesmoke;
       }
 
       #geolocation-table {
@@ -51,7 +83,63 @@
   </head>
   <body>
     <h1>TEST: Geolocation</h1>
-    <button type="button" onclick="get_geolocation()">GET Geolocation</button>
+    <div class="options">
+      <dl class="form-data-list">
+        <dt>
+          <label
+            title="受信する位置データの古さ"
+            for="geolocation-option-maximum-age">
+            maximumAge[ms]
+          </label>
+        </dt>
+        <dd>
+          <input
+            type="number"
+            name="geolocation-option-maximum-age"
+            id="geolocation-option-maximum-age"
+            value="0" />
+          <small>※0 で必ず新規取得</small>
+        </dd>
+        <dt>
+          <label title="位置データ取得期限" for="geolocation-option-timeout">
+            timeout[ms]
+          </label>
+        </dt>
+        <dd>
+          <input
+            type="number"
+            name="geolocation-option-timeout"
+            id="geolocation-option-timeout"
+            value="0" />
+          <label>
+            <input
+              type="checkbox"
+              name="geolocation-option-timeout-infinity"
+              id="geolocation-option-timeout-infinity"
+              checked />
+            Infinity(取得まで待機)
+          </label>
+        </dd>
+        <dt>
+          <label
+            title="可能な限り正確な位置データを受信したい"
+            for="geolocation-option-enable-high-accuracy">
+            enableHighAccuracy
+          </label>
+        </dt>
+        <dd>
+          <label>
+            <input
+              type="checkbox"
+              name="geolocation-option-enable-high-accuracy"
+              id="geolocation-option-enable-high-accuracy"
+              checked />
+            on(可能な限り正確なデータを要求)
+          </label>
+        </dd>
+      </dl>
+    </div>
+    <button type="button" id="button-get-geolocation">GET Geolocation</button>
     <div class="scroll-block--x">
       <table id="geolocation-table">
         <thead>
@@ -72,13 +160,50 @@
       </table>
     </div>
     <small>
-      ※timestamp は DOMTimestamp を Date クラスに入れて、 toLocaleDateString(),
-      toLocaleTimeString()を連結してます。
+      <h2>Geolocation API</h2>
+
+      <p>
+        <a href="https://developer.mozilla.org/ja/docs/Web/API/Geolocation_API">
+          https://developer.mozilla.org/ja/docs/Web/API/Geolocation_API
+        </a>
+      </p>
+      <h2>timestamp について</h2>
+      <p>
+        <code>timestamp</code> は <code>DOMTimestamp</code> を
+        <code>Date</code> クラスに入れて、 <code>toLocaleDateString()</code>,
+        <code>toLocaleTimeString()</code>を連結してます。
+      </p>
+      <h2>テーブルヘッダ説明</h2>
+      <p>テーブルヘッダは下記のような意味を持ちます。</p>
+      <dl>
+        <dt>timestamp</dt>
+        <dd>タイムスタンプ</dd>
+        <dt>latitude[deg]</dt>
+        <dd>緯度[度]</dd>
+        <dt>longitude[deg]</dt>
+        <dd>経度[度]</dd>
+        <dt>accuracy[m]</dt>
+        <dd>緯度経度の精度[メートル]</dd>
+        <dt>altitude[m]</dt>
+        <dd>海面からの相対高度[メートル]</dd>
+        <dt>altitudeAccura</dt>
+        <dd>海面からの相対高度の精度[メートル]</dd>
+        <dt>heading[deg]</dt>
+        <dd>真北を基準とした端末の向き[度]</dd>
+        <dt>speed[m/s]</dt>
+        <dd>端末の移動速度[メートル毎秒]</dd>
+      </dl>
     </small>
   </body>
   <script lang="js">
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("button-get-geolocation").addEventListener("click", () => {
+        getGeolocation();
+      })
+    })
+
     // https://developer.mozilla.org/ja/docs/Web/API/GeolocationCoordinates
-    function get_geolocation() {
+    function getGeolocation() {
       navigator.geolocation.getCurrentPosition(
         (geolocationPosition) => {
           let tbody = document.querySelector("#geolocation-table tbody");
@@ -149,9 +274,9 @@
 
         },
         {
-          maximumAge: 0,
-          timeout: 1000,
-          enableHighAccuracy: true
+          maximumAge: document.getElementById("geolocation-option-maximum-age").value,
+          timeout: document.getElementById("geolocation-option-timeout-infinity").checked ? Infinity : document.getElementById("geolocation-option-timeout").value,
+          enableHighAccuracy: document.getElementById("geolocation-option-enable-high-accuracy").checked
         }
       );
     }
